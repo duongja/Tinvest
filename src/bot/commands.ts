@@ -1,10 +1,11 @@
-import type { Bot } from "grammy";
+import { InlineKeyboard, type Bot } from "grammy";
 import { env } from "../config/env.js";
 import { prisma } from "../db/client.js";
 import { AssetRepository } from "../repositories/assets.js";
 import { ScoreRepository } from "../repositories/scores.js";
 import { UserRepository } from "../repositories/users.js";
 import { ReportService } from "../services/reports.js";
+import { buildStonfiSwapLink } from "../stonfi/swap-link.js";
 import { commandArgument, ensureUser } from "./context.js";
 import { disclaimer, formatReport, formatRules, formatScoreLine, formatWatchlistLine } from "./formatters.js";
 
@@ -28,6 +29,7 @@ export function registerCommands(bot: Bot): void {
         "/unwatch <symbol or address> - remove an asset",
         "/watchlist - your watched assets",
         "/report <symbol or address> - explain latest score",
+        "/buy <symbol or address> [TON amount] - open a user-approved STON.fi swap",
         "/alerts - show active alert rules",
         "",
         disclaimer
@@ -131,9 +133,78 @@ export function registerCommands(bot: Bot): void {
     await ctx.reply(formatReport(body));
   });
 
+  bot.command("buy", async (ctx) => {
+    await ensureUser(ctx);
+    const args = commandArgument(ctx).split(/\s+/).filter(Boolean);
+    const query = args[0];
+    const amountTon = args[1];
+
+    if (!query) {
+      await ctx.reply("Usage: /buy <symbol or token address> [TON amount]\nExample: /buy STON 1");
+      return;
+    }
+
+    const asset = await assets.findAssetByQuery(query);
+    if (!asset) {
+      await ctx.reply(`I could not find ${query} in the collected STON.fi asset set.`);
+      return;
+    }
+
+    if (asset.symbol.toUpperCase() === "TON") {
+      await ctx.reply(
+        [
+          "TON is the default input asset for this buy flow.",
+          "To buy TON itself, use Telegram Wallet, Tonkeeper, or open STON.fi manually and choose another input token.",
+          "",
+          disclaimer
+        ].join("\n")
+      );
+      return;
+    }
+
+    if (amountTon && !isValidPositiveAmount(amountTon)) {
+      await ctx.reply("Invalid TON amount. Example: /buy STON 1.5");
+      return;
+    }
+
+    const score = await scores.latestForAsset(asset.id);
+    const swapUrl = buildStonfiSwapLink({
+      baseUrl: env.STONFI_SWAP_BASE_URL,
+      fromToken: "TON",
+      targetToken: asset.id,
+      fromAmount: amountTon
+    });
+    const keyboard = new InlineKeyboard().url("Open STON.fi swap", swapUrl);
+
+    await ctx.reply(
+      [
+        `Buy ${asset.symbol} with TON`,
+        amountTon ? `Prefilled amount: ${amountTon} TON` : "Amount: choose inside STON.fi",
+        score ? `Watcher score: ${score.opportunityScore}/100 | Risk: ${score.riskScore}/100` : "Watcher score: not available yet",
+        `Token address: ${asset.id}`,
+        "",
+        "The bot does not execute this trade.",
+        "Open STON.fi, connect your wallet, verify the token address and amount, then approve or reject the transaction in your wallet.",
+        "",
+        disclaimer
+      ].join("\n"),
+      {
+        reply_markup: keyboard
+      }
+    );
+  });
+
   bot.command("alerts", async (ctx) => {
     const user = await ensureUser(ctx);
     const rules = await users.alertRulesForUser(user.id);
     await ctx.reply(["Active alert rules", formatRules(rules), "", disclaimer].join("\n"));
   });
+}
+
+function isValidPositiveAmount(value: string): boolean {
+  if (!/^\d+(\.\d+)?$/.test(value)) {
+    return false;
+  }
+
+  return Number(value) > 0;
 }

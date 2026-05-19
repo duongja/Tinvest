@@ -65,6 +65,7 @@ Telegram-native MVP for monitoring TON assets with STON.fi data. It collects poo
 - `/unwatch <symbol or address>` - remove an asset from your watchlist.
 - `/watchlist` - show watched assets with latest scores.
 - `/report <symbol or address>` - explain the latest score.
+- `/buy <symbol or address> [TON amount]` - open an explicit user-approved STON.fi swap link.
 - `/alerts` - list active alert rules.
 
 ## Verification
@@ -81,4 +82,5 @@ npm run health
 
 - Scores are deterministic and auditable; the LLM cannot change rankings.
 - STON.fi is the only market data source in this MVP.
+- `/buy` never executes trades or touches wallet keys. It opens STON.fi with the target token prefilled; the user reviews and confirms in their own wallet.
 - This is not financial advice and should not be presented as automated portfolio management.

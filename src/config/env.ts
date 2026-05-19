@@ -5,6 +5,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   TELEGRAM_BOT_TOKEN: z.string().optional().default(""),
   STONFI_API_BASE_URL: z.string().url().default("https://api.ston.fi"),
+  STONFI_SWAP_BASE_URL: z.string().url().default("https://app.ston.fi/swap"),
   STONFI_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
   STONFI_REQUEST_RETRIES: z.coerce.number().int().min(1).default(3),
   STONFI_MAX_POOLS: z.coerce.number().int().positive().default(1_000),
