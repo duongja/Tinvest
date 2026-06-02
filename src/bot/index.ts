@@ -11,6 +11,20 @@ if (!env.TELEGRAM_BOT_TOKEN) {
 const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
 registerCommands(bot);
 
+try {
+  await bot.api.setChatMenuButton({
+    menu_button: {
+      type: "web_app",
+      text: "Swap",
+      web_app: {
+        url: env.MINI_APP_PUBLIC_URL
+      }
+    }
+  });
+} catch (error) {
+  logger.warn({ message: error instanceof Error ? error.message : String(error) }, "failed to set Telegram menu button");
+}
+
 bot.catch((error) => {
   logger.error({ error }, "telegram bot error");
 });

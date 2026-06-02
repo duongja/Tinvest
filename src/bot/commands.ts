@@ -176,7 +176,7 @@ export function registerCommands(bot: Bot): void {
     });
     const miniAppUrl = buildMiniAppBuyUrl(asset.symbol, amountTon);
     const keyboard = new InlineKeyboard()
-      .url("Open in Telegram", miniAppUrl)
+      .webApp("Open Mini App", miniAppUrl)
       .row()
       .url("Fallback: STON.fi", fallbackSwapUrl);
 
