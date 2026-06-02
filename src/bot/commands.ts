@@ -5,7 +5,6 @@ import { AssetRepository } from "../repositories/assets.js";
 import { ScoreRepository } from "../repositories/scores.js";
 import { UserRepository } from "../repositories/users.js";
 import { ReportService } from "../services/reports.js";
-import { buildStonfiSwapLink } from "../stonfi/swap-link.js";
 import { commandArgument, ensureUser } from "./context.js";
 import { disclaimer, formatReport, formatRules, formatScoreLine, formatWatchlistLine } from "./formatters.js";
 
@@ -168,17 +167,8 @@ export function registerCommands(bot: Bot): void {
     }
 
     const score = await scores.latestForAsset(asset.id);
-    const fallbackSwapUrl = buildStonfiSwapLink({
-      baseUrl: env.STONFI_SWAP_BASE_URL,
-      fromToken: "TON",
-      targetToken: asset.id,
-      fromAmount: amountTon
-    });
     const miniAppUrl = buildMiniAppBuyUrl(asset.symbol, amountTon);
-    const keyboard = new InlineKeyboard()
-      .webApp("Open Mini App", miniAppUrl)
-      .row()
-      .url("Fallback: STON.fi", fallbackSwapUrl);
+    const keyboard = new InlineKeyboard().webApp("Open Mini App", miniAppUrl);
 
     await ctx.reply(
       [
