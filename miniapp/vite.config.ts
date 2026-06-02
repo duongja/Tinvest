@@ -5,7 +5,7 @@ export default defineConfig({
   root: __dirname,
   plugins: [react()],
   build: {
-    outDir: "../dist/miniapp",
+    outDir: "../dist",
     emptyOutDir: true
   },
   server: {
