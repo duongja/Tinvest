@@ -8,7 +8,7 @@ The current implementation includes a public landing page with a waitlist, a Tel
 
 - `/` - public one-screen landing page with waitlist.
 - `/app` - Telegram Mini App for token buying through STON.fi-powered routing and wallet approval.
-- Telegram bot - token rankings, watchlists, AI reports, AI pre-buy checks, alerts, and Mini App entrypoints.
+- Telegram bot: `@Tinvester1bot` - token rankings, watchlists, AI reports, AI pre-buy checks, alerts, and Mini App entrypoints.
 - Serverless API - Vercel API routes for data, buying flow, waitlist, Telegram webhook, and cron jobs.
 
 ## What It Does
@@ -135,6 +135,8 @@ Local frontend routes:
 - Local API server: `http://127.0.0.1:3000`
 
 ## Telegram Commands
+
+Current bot: `@Tinvester1bot`
 
 - `/start` - onboarding and command list.
 - `/top` - top ranked tokens by latest watcher scores.

@@ -32,7 +32,13 @@ If you already joined before, submitting the same email updates the existing wai
 
 ## Telegram Bot
 
-Open the Tinvest Telegram bot and send:
+Open the Tinvest Telegram bot:
+
+```text
+@Tinvester1bot
+```
+
+Then send:
 
 ```text
 /start
