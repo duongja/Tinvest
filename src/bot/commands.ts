@@ -241,7 +241,7 @@ function isValidPositiveAmount(value: string): boolean {
 }
 
 function buildMiniAppBuyUrl(symbolOrAddress: string, amountTon?: string): string {
-  const url = new URL("/", env.MINI_APP_PUBLIC_URL);
+  const url = new URL("/app", env.MINI_APP_PUBLIC_URL);
   url.searchParams.set("token", symbolOrAddress);
   if (amountTon) {
     url.searchParams.set("amount", amountTon);

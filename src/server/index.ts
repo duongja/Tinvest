@@ -11,12 +11,13 @@ import {
   configResponse,
   swapQuoteResponse,
   swapTransactionResponse,
-  tonconnectManifestResponse
+  tonconnectManifestResponse,
+  waitlistResponse
 } from "./handlers.js";
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const staticDir = path.resolve(__dirname, "../../miniapp");
+const staticDir = path.resolve(__dirname, process.env.NODE_ENV === "production" ? "../../dist" : "../../miniapp");
 
 app.use(express.json({ limit: "32kb" }));
 app.use(express.static(staticDir));
@@ -56,6 +57,14 @@ app.post("/api/swap/transaction", async (req, res) => {
 app.post("/api/ai/swap-check", async (req, res) => {
   try {
     res.json(await aiSwapCheckResponse(req.body));
+  } catch (error) {
+    sendError(res, error);
+  }
+});
+
+app.post("/api/waitlist", async (req, res) => {
+  try {
+    res.json(await waitlistResponse(req.body));
   } catch (error) {
     sendError(res, error);
   }

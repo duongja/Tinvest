@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
@@ -16,6 +17,13 @@ export const quoteSchema = z.object({
   token: z.string().min(1),
   amountTon: z.string().regex(/^\d+(\.\d+)?$/),
   slippageTolerance: z.string().regex(/^0(\.\d+)?$|^1(\.0+)?$/).optional()
+});
+
+const waitlistSchema = z.object({
+  email: z.string().email().transform((value) => value.toLowerCase()),
+  name: z.string().trim().max(80).optional(),
+  source: z.string().trim().max(80).optional(),
+  metadata: z.record(z.unknown()).optional()
 });
 
 export function configResponse() {
@@ -70,6 +78,30 @@ export async function swapTransactionResponse(body: unknown) {
 
 export async function aiSwapCheckResponse(body: unknown) {
   return aiSwapCheck.create(quoteSchema.parse(body));
+}
+
+export async function waitlistResponse(body: unknown) {
+  const input = waitlistSchema.parse(body);
+  const metadata = input.metadata as Prisma.InputJsonValue | undefined;
+  const entry = await prisma.waitlistEntry.upsert({
+    where: { email: input.email },
+    update: {
+      name: input.name,
+      source: input.source,
+      metadata
+    },
+    create: {
+      email: input.email,
+      name: input.name,
+      source: input.source,
+      metadata
+    }
+  });
+
+  return {
+    ok: true,
+    id: entry.id
+  };
 }
 
 export class ApiError extends Error {

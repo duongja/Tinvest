@@ -25,7 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       type: "web_app",
       text: "Swap",
       web_app: {
-        url: env.MINI_APP_PUBLIC_URL
+        url: new URL("/app", env.MINI_APP_PUBLIC_URL).toString()
       }
     }
   });

@@ -36,7 +36,7 @@ type AiSwapCheck = {
   notAdvice: string;
 };
 
-export function App({ defaultSlippage }: AppProps) {
+export function TradingApp({ defaultSlippage }: AppProps) {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const [token, setToken] = useState(params.get("token") ?? params.get("symbol") ?? "STON");
   const [amountTon, setAmountTon] = useState(params.get("amount") ?? "1");
@@ -137,7 +137,7 @@ export function App({ defaultSlippage }: AppProps) {
   }
 
   return (
-    <main className="shell">
+    <main className="appShell">
       <header className="topbar">
         <div>
           <h1>TON Economic Watchers</h1>

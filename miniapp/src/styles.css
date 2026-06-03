@@ -1,11 +1,17 @@
 :root {
-  color: #17202a;
-  background: #f5f7fb;
+  color: #101418;
+  background: #f7f3eb;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 * {
   box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
 }
 
 body {
@@ -18,7 +24,309 @@ select {
   font: inherit;
 }
 
-.shell {
+.landingShell {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  align-items: center;
+  width: 100%;
+  height: 100dvh;
+  min-height: 620px;
+  overflow: hidden;
+  padding: clamp(22px, 4vw, 54px);
+  background:
+    radial-gradient(circle at 80% 26%, rgba(49, 118, 255, 0.14), transparent 28%),
+    linear-gradient(135deg, #fbf7ee 0%, #f7f9fc 42%, #eef5ff 100%);
+}
+
+.landingCopy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  align-content: center;
+  max-width: 680px;
+  height: 100%;
+}
+
+.brandBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #18212c;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.brandMark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #101418;
+}
+
+.heroStack {
+  max-width: 650px;
+}
+
+.eyebrow {
+  margin: 0 0 14px;
+  color: #2f68d8;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  color: #101418;
+  font-size: clamp(40px, 6vw, 78px);
+  line-height: 0.95;
+  letter-spacing: 0;
+  max-width: 780px;
+}
+
+.lead {
+  max-width: 600px;
+  margin: 22px 0 0;
+  color: #4d5967;
+  font-size: clamp(16px, 1.7vw, 20px);
+  line-height: 1.55;
+}
+
+.waitlistForm {
+  width: min(520px, 100%);
+  margin-top: clamp(28px, 5vh, 48px);
+}
+
+.waitlistForm label {
+  display: block;
+  margin-bottom: 9px;
+  color: #1b2733;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.emailRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid rgba(16, 20, 24, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 18px 60px rgba(47, 104, 216, 0.12);
+}
+
+.emailRow input {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  padding: 13px 12px;
+  color: #101418;
+  background: transparent;
+}
+
+.emailRow button {
+  border: 0;
+  border-radius: 6px;
+  padding: 0 20px;
+  color: #ffffff;
+  background: #101418;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.emailRow button:disabled {
+  opacity: 0.62;
+  cursor: wait;
+}
+
+.waitlistMessage {
+  min-height: 20px;
+  margin: 10px 0 0;
+  color: #5d6672;
+  font-size: 13px;
+}
+
+.errorText {
+  color: #9b2f17;
+}
+
+.metricStrip {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  gap: clamp(18px, 4vw, 42px);
+}
+
+.metricStrip div {
+  display: grid;
+  gap: 3px;
+}
+
+.metricStrip strong {
+  color: #101418;
+  font-size: 17px;
+}
+
+.metricStrip span {
+  color: #6d7580;
+  font-size: 12px;
+}
+
+.wealthOrbit {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(44vw, 570px);
+  aspect-ratio: 1;
+  justify-self: center;
+}
+
+.wealthOrbit::before {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 44% 40%, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.22) 28%, transparent 52%),
+    radial-gradient(circle, rgba(47, 104, 216, 0.18), transparent 66%);
+  filter: blur(2px);
+}
+
+.starfield,
+.orbit,
+.planetCore,
+.coin {
+  position: absolute;
+}
+
+.starfield {
+  inset: 0;
+  animation: rotateSlow 42s linear infinite;
+}
+
+.starfield i {
+  --angle: calc(var(--dot) * 20deg);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(16, 20, 24, 0.48);
+  transform: rotate(var(--angle)) translateX(calc(130px + var(--dot) * 5px)) rotate(calc(var(--angle) * -1));
+}
+
+.orbit {
+  border: 1px solid rgba(16, 20, 24, 0.18);
+  border-radius: 50%;
+}
+
+.orbitOuter {
+  inset: 2%;
+  animation: rotateSlow 30s linear infinite;
+}
+
+.orbitMiddle {
+  inset: 17%;
+  transform: rotate(18deg);
+  animation: rotateSlow 24s linear infinite reverse;
+}
+
+.orbitInner {
+  inset: 31%;
+  transform: rotate(-22deg);
+  animation: rotateSlow 18s linear infinite;
+}
+
+.planetCore {
+  display: grid;
+  place-items: center;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 36% 28%, #8fc5ff, transparent 28%),
+    linear-gradient(145deg, #1c74ff, #101418 82%);
+  box-shadow: 0 30px 100px rgba(28, 116, 255, 0.36);
+}
+
+.planetCore span {
+  font-size: 25px;
+  font-weight: 900;
+}
+
+.coin {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  color: #101418;
+  background: #f5c94b;
+  box-shadow: 0 16px 46px rgba(215, 162, 18, 0.26);
+  font-weight: 900;
+}
+
+.coinOne {
+  top: 18%;
+  right: 9%;
+  animation: floatOne 5.8s ease-in-out infinite;
+}
+
+.coinTwo {
+  left: 5%;
+  bottom: 22%;
+  animation: floatTwo 6.5s ease-in-out infinite;
+}
+
+.coinThree {
+  right: 16%;
+  bottom: 10%;
+  width: 62px;
+  height: 62px;
+  color: #ffffff;
+  background: #101418;
+  animation: floatOne 7s ease-in-out infinite reverse;
+}
+
+@keyframes rotateSlow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes floatOne {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes floatTwo {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(12px) translateX(8px);
+  }
+}
+
+.appShell {
   width: min(760px, 100%);
   margin: 0 auto;
   padding: 20px;
@@ -32,9 +340,9 @@ select {
   margin-bottom: 20px;
 }
 
-h1 {
-  margin: 0;
+.topbar h1 {
   font-size: 24px;
+  line-height: 1.12;
 }
 
 h2 {
@@ -56,7 +364,7 @@ p {
   margin-bottom: 14px;
 }
 
-label {
+.swapPanel label {
   display: grid;
   gap: 6px;
   margin-bottom: 12px;
@@ -65,8 +373,8 @@ label {
   font-weight: 700;
 }
 
-input,
-select {
+.swapPanel input,
+.swapPanel select {
   width: 100%;
   border: 1px solid #c9d4e2;
   border-radius: 6px;
@@ -149,4 +457,94 @@ li {
   margin: 12px 0 0;
   font-size: 12px;
   color: #667085;
+}
+
+@media (max-width: 860px) {
+  .landingShell {
+    grid-template-columns: 1fr;
+    min-height: 100dvh;
+    padding: 22px;
+  }
+
+  .landingCopy {
+    max-width: none;
+  }
+
+  .wealthOrbit {
+    position: absolute;
+    right: -120px;
+    bottom: -150px;
+    width: 360px;
+    opacity: 0.48;
+  }
+
+  .brandBar {
+    top: 2px;
+  }
+
+  .metricStrip {
+    position: static;
+    margin-top: 22px;
+  }
+}
+
+@media (max-width: 560px) {
+  .landingShell {
+    padding: 18px;
+  }
+
+  h1 {
+    font-size: clamp(34px, 12vw, 52px);
+  }
+
+  .lead {
+    font-size: 15px;
+  }
+
+  .emailRow {
+    grid-template-columns: 1fr;
+  }
+
+  .emailRow button {
+    min-height: 44px;
+  }
+
+  .metricStrip {
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .wealthOrbit {
+    right: -170px;
+    bottom: -190px;
+    width: 340px;
+  }
+}
+
+@media (max-height: 700px) and (min-width: 861px) {
+  .landingShell {
+    min-height: 560px;
+  }
+
+  h1 {
+    font-size: clamp(36px, 5vw, 60px);
+  }
+
+  .lead {
+    margin-top: 16px;
+  }
+
+  .waitlistForm {
+    margin-top: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
