@@ -1,127 +1,69 @@
-# TON Economic Watchers
+# Tinvest
 
-Telegram-native MVP for monitoring TON assets with STON.fi data. It collects pool metrics, computes deterministic opportunity/risk scores, explains rankings through concise reports, and supports user-approved Telegram Mini App swaps.
+Tinvest is a TON ecosystem investment intelligence platform. It helps users discover, analyze, monitor, and buy TON ecosystem tokens using AI-assisted research, STON.fi market data, watcher scores, Telegram-native workflows, and STON.fi-powered buying.
+
+The current implementation includes a public landing page with a waitlist, a Telegram bot, a Telegram Mini App buying flow, deterministic token scoring, AI token checks, watchlists, alerts, and Vercel-ready serverless APIs.
+
+## Product Surfaces
+
+- `/` - public one-screen landing page with waitlist.
+- `/app` - Telegram Mini App for token buying through STON.fi-powered routing and wallet approval.
+- Telegram bot - token rankings, watchlists, AI reports, AI pre-buy checks, alerts, and Mini App entrypoints.
+- Serverless API - Vercel API routes for data, buying flow, waitlist, Telegram webhook, and cron jobs.
 
 ## What It Does
 
-- Polls STON.fi `/v1/assets` and `/v1/pools`, then monitors the highest-liquidity pools configured by `STONFI_MAX_POOLS`.
-- Stores pool metric snapshots in Postgres.
-- Scores assets by liquidity, activity, market health, stability, and STON.fi ecosystem presence.
-- Sends Telegram bot responses for top assets, risk assets, watchlists, reports, and alert rules.
-- Uses an LLM for report wording and pre-swap risk checks. If no `OPENAI_API_KEY` is configured, deterministic fallback text/checks are used.
+- Collects TON token and pool data from STON.fi.
+- Stores assets, pools, liquidity, volume, and metric snapshots in Postgres.
+- Scores tokens by liquidity, activity, market health, stability, and ecosystem presence.
+- Uses AI to explain token scores, summarize risks, and generate pre-buy checks.
+- Lets users create token watchlists and receive alert-rule based updates.
+- Lets users buy supported TON tokens through a STON.fi-powered Telegram Mini App.
+- Captures waitlist submissions from the public website.
 
-## Setup
+## Current Scope
 
-1. Install dependencies:
+This is the MVP foundation for a broader TON investment intelligence platform. Today, the system focuses on STON.fi market data, scoring, AI summaries, Telegram UX, and STON.fi-powered buying. The planned next stage expands into richer off-chain intelligence: ecosystem events, project announcements, Telegram/community signals, product launches, developer activity, campaigns, and other token-relevant context.
 
-   ```bash
-   npm install
-   ```
+Tinvest is an informational product. It is not financial advice, automated portfolio management, or a custodial trading system. Users keep control of wallet connection and transaction approval.
 
-2. Copy environment variables:
+## Tech Stack
 
-   ```bash
-   cp .env.example .env
-   ```
+- TypeScript
+- React + Vite
+- Telegram Bot API via grammY
+- Telegram Mini App
+- TON Connect
+- STON.fi API/SDK integration
+- Prisma + Postgres
+- OpenAI-compatible Responses API
+- Vercel serverless functions and cron jobs
 
-3. Fill in `DATABASE_URL` and `TELEGRAM_BOT_TOKEN`. `OPENAI_API_KEY` is optional.
-   `STONFI_MAX_POOLS` defaults to `1000` so the MVP starts with the most liquid pools instead of the full long tail.
+## Project Structure
 
-4. Start Postgres:
-
-   ```bash
-   docker compose up -d postgres
-   ```
-
-5. Apply migrations and generate Prisma client:
-
-   ```bash
-   npm run db:generate
-   npm run db:deploy
-   ```
-
-6. Bootstrap data:
-
-   ```bash
-   npm run run:collector
-   npm run run:scorer
-   ```
-
-7. Start the bot and workers:
-
-   ```bash
-   npm run dev:bot
-   npm run dev:collector
-   npm run dev:scorer
-   npm run dev:alerts
-   ```
-
-## Telegram Commands
-
-- `/start` - onboarding and disclaimer.
-- `/top` - top ranked assets.
-- `/risk` - highest-risk scored assets.
-- `/watch <symbol or address>` - add an asset to your watchlist.
-- `/unwatch <symbol or address>` - remove an asset from your watchlist.
-- `/watchlist` - show watched assets with latest scores.
-- `/report <symbol or address>` - explain the latest score.
-- `/swapcheck <symbol or address> <TON amount>` - run an AI pre-swap risk check using STON.fi quote and watcher data.
-- `/buy <symbol or address> [TON amount]` - open a user-approved Telegram Mini App swap.
-- `/alerts` - list active alert rules.
-
-## Verification
-
-```bash
-npm run typecheck
-npm test
-npm run health
+```text
+api/                         Vercel serverless API routes
+docs/user-guide.md           User-facing guide
+miniapp/                     Landing page and Telegram Mini App frontend
+prisma/                      Prisma schema and migrations
+scripts/setup-telegram.ts    Telegram webhook/menu setup script
+src/bot/                     Telegram bot commands
+src/jobs/                    Local collector, scorer, alert workers
+src/server/                  Shared API handlers and local Express server
+src/services/                Collector, scoring, alerts, reports, buying services
+src/stonfi/                  STON.fi client and normalizers
+tests/                       Unit tests
 ```
 
-`npm run health` expects recent successful collector and scorer runs in Postgres.
+## Environment Variables
 
-## Notes
-
-- Scores are deterministic and auditable; the LLM cannot change rankings.
-- STON.fi is the only market data source in this MVP.
-- `/buy` never touches wallet keys. It opens the Telegram Mini App, which uses STON.fi quote/transaction building plus TON Connect wallet approval.
-- AI swap checks are warn-only. They summarize quote impact, score context, and invalidation signals, but they do not block user-approved swaps.
-- This is not financial advice and should not be presented as automated portfolio management.
-
-## Telegram Mini App Swaps
-
-The in-Telegram swap flow needs a public HTTPS URL because TON Connect wallets must read `tonconnect-manifest.json`.
-
-Set these values in `.env` before using `/buy` in production:
+Copy the sample env file:
 
 ```bash
-MINI_APP_PUBLIC_URL="https://your-public-domain.example"
-MINI_APP_ICON_URL="https://your-public-domain.example/icon.png"
-TON_RPC_ENDPOINT="https://toncenter.com/api/v2/jsonRPC"
-TON_RPC_API_KEY=""
+cp .env.example .env
 ```
 
-Run locally:
-
-```bash
-npm run dev:server
-npm run dev:miniapp
-```
-
-For Telegram testing, expose the server with an HTTPS tunnel and set `MINI_APP_PUBLIC_URL` to that HTTPS URL.
-
-The Mini App calls `/api/swap/quote`, `/api/ai/swap-check`, and `/api/swap/transaction` from the same server. The AI check is persisted in Postgres for later review.
-
-## Vercel Deployment
-
-Vercel runs this app as static Mini App assets plus serverless API routes. The Telegram bot uses webhooks on Vercel; do not run `npm run dev:bot` or long-polling in the deployed project.
-
-Required production services:
-
-- A public Postgres database reachable from Vercel.
-- The Telegram bot token.
-- A public Vercel domain for `MINI_APP_PUBLIC_URL`.
-
-Set these Vercel environment variables:
+Required for production:
 
 ```bash
 DATABASE_URL="postgresql://..."
@@ -129,8 +71,8 @@ TELEGRAM_BOT_TOKEN="..."
 TELEGRAM_WEBHOOK_SECRET="generate-a-random-secret"
 ADMIN_SECRET="generate-a-random-secret"
 CRON_SECRET="generate-a-random-secret"
-MINI_APP_PUBLIC_URL="https://your-vercel-domain.vercel.app"
-MINI_APP_ICON_URL="https://your-vercel-domain.vercel.app/icon.png"
+MINI_APP_PUBLIC_URL="https://your-domain.example"
+MINI_APP_ICON_URL="https://your-domain.example/icon.png"
 OPENAI_API_KEY="..."
 OPENAI_BASE_URL="https://share-ai.ckbdev.com"
 OPENAI_MODEL="gpt-5.4"
@@ -141,6 +83,113 @@ TON_RPC_ENDPOINT="https://toncenter.com/api/v2/jsonRPC"
 TON_RPC_API_KEY=""
 ```
 
+For Supabase pooler deployments, use a dedicated Prisma schema and pooler-safe settings:
+
+```bash
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/postgres?schema=watchers&pgbouncer=true&connection_limit=1&sslmode=require"
+```
+
+The `schema=watchers` part matters. Without it, Prisma will look for tables such as `public.Asset`.
+
+## Local Development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start local Postgres:
+
+```bash
+docker compose up -d postgres
+```
+
+Generate Prisma client and apply migrations:
+
+```bash
+npm run db:generate
+npm run db:deploy
+```
+
+Bootstrap STON.fi data and scores:
+
+```bash
+npm run run:collector
+npm run run:scorer
+```
+
+Run local services:
+
+```bash
+npm run dev:server
+npm run dev:miniapp
+npm run dev:bot
+npm run dev:alerts
+```
+
+Local frontend routes:
+
+- Landing page: `http://127.0.0.1:5173/`
+- Mini App: `http://127.0.0.1:5173/app`
+- Local API server: `http://127.0.0.1:3000`
+
+## Telegram Commands
+
+- `/start` - onboarding and command list.
+- `/top` - top ranked tokens by latest watcher scores.
+- `/risk` - highest-risk scored tokens.
+- `/watch <symbol or address>` - add a token to your watchlist.
+- `/unwatch <symbol or address>` - remove a token from your watchlist.
+- `/watchlist` - show watched tokens with latest scores.
+- `/report <symbol or address>` - explain the latest score.
+- `/swapcheck <symbol or address> <TON amount>` - run an AI pre-buy risk check.
+- `/buy <symbol or address> [TON amount]` - open the Telegram Mini App for user-approved buying.
+- `/alerts` - show active alert rules.
+
+## API Routes
+
+Public/app routes:
+
+- `GET /api/config`
+- `GET /api/assets/:query`
+- `POST /api/waitlist`
+- `POST /api/ai/swap-check`
+- `POST /api/swap/quote`
+- `POST /api/swap/transaction`
+- `GET /tonconnect-manifest.json`
+
+Telegram and operations routes:
+
+- `POST /api/telegram/webhook`
+- `POST /api/telegram/setup`
+- `GET|POST /api/cron/run`
+- `GET|POST /api/cron/collector`
+- `GET|POST /api/cron/scorer`
+- `GET|POST /api/cron/alerts`
+
+`/api/telegram/setup` requires:
+
+```text
+Authorization: Bearer $ADMIN_SECRET
+```
+
+Cron routes require:
+
+```text
+Authorization: Bearer $CRON_SECRET
+```
+
+## Vercel Deployment
+
+Vercel serves the frontend from `dist/` and runs the API as serverless functions.
+
+Build settings:
+
+- Root directory: repository root
+- Build command: `npm run vercel-build`
+- Output directory: `dist`
+
 Deploy:
 
 ```bash
@@ -149,21 +198,74 @@ npm run vercel-build
 vercel deploy --prod
 ```
 
-After the production URL is live, set `MINI_APP_PUBLIC_URL` to that exact HTTPS URL in Vercel, redeploy, then register Telegram:
+After the production URL is live:
+
+1. Set `MINI_APP_PUBLIC_URL` to the final HTTPS domain.
+2. Set `MINI_APP_ICON_URL` to `https://your-domain/icon.png`.
+3. Redeploy.
+4. Register Telegram webhook and Mini App menu:
 
 ```bash
-curl -X POST "https://your-vercel-domain.vercel.app/api/telegram/setup" \
+curl -X POST "https://your-domain/api/telegram/setup" \
   -H "Authorization: Bearer $ADMIN_SECRET"
 ```
 
-One Vercel cron route is scheduled in `vercel.json`:
+Scheduled jobs are configured in `vercel.json`:
 
-- `/api/cron/run` - collector, scorer, then alerts.
+- `/api/cron/run` runs collector, scorer, then alerts.
 
-Manual cron routes are also available for targeted runs:
+Manual targeted cron routes are also available:
 
 - `/api/cron/collector`
 - `/api/cron/scorer`
 - `/api/cron/alerts`
 
-All cron routes require `Authorization: Bearer $CRON_SECRET` when called manually. Vercel Cron also sends that bearer token automatically when `CRON_SECRET` is configured.
+## Verification
+
+Run:
+
+```bash
+npm run typecheck
+npm test
+npm run vercel-build
+npm run health
+```
+
+`npm run health` expects recent successful collector and scorer runs in Postgres.
+
+Useful smoke tests:
+
+```bash
+curl https://your-domain/api/config
+curl https://your-domain/api/assets/STON
+curl https://your-domain/tonconnect-manifest.json
+```
+
+Waitlist smoke test:
+
+```bash
+curl -X POST "https://your-domain/api/waitlist" \
+  -H "content-type: application/json" \
+  --data '{"email":"user@example.com","source":"manual"}'
+```
+
+AI pre-buy check smoke test:
+
+```bash
+curl -X POST "https://your-domain/api/ai/swap-check" \
+  -H "content-type: application/json" \
+  --data '{"token":"STON","amountTon":"0.1"}'
+```
+
+## Safety Notes
+
+- Tinvest never asks users for seed phrases or private keys.
+- The bot does not execute buys by itself.
+- Users must connect their wallet and approve transactions through TON Connect.
+- AI checks are informational and warn-only.
+- Scores are deterministic and auditable; AI does not change rankings.
+- The product should be presented as investment intelligence, not financial advice.
+
+## User Guide
+
+See [docs/user-guide.md](docs/user-guide.md).
