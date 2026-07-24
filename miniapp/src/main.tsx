@@ -3,7 +3,14 @@ import { createRoot } from "react-dom/client";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import { TradingApp } from "./App";
 import { Landing } from "./Landing";
+import { readJsonResponse, responseError } from "./http";
 import "./styles.css";
+
+type AppConfig = {
+  manifestUrl: string;
+  defaultSlippage: string;
+  error?: string;
+};
 
 async function bootstrap() {
   if (!window.location.pathname.startsWith("/app")) {
@@ -15,7 +22,7 @@ async function bootstrap() {
     return;
   }
 
-  const config = await fetch("/api/config").then((res) => res.json());
+  const config = await loadAppConfig();
   createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <TonConnectUIProvider manifestUrl={config.manifestUrl}>
@@ -23,6 +30,28 @@ async function bootstrap() {
       </TonConnectUIProvider>
     </React.StrictMode>
   );
+}
+
+async function loadAppConfig(): Promise<AppConfig> {
+  const fallback = {
+    manifestUrl: new URL("/tonconnect-manifest.json", window.location.origin).toString(),
+    defaultSlippage: "0.01"
+  };
+
+  try {
+    const response = await fetch("/api/config");
+    const config = await readJsonResponse<AppConfig>(response);
+    if (!response.ok) {
+      throw new Error(responseError(config, "Could not load Mini App configuration."));
+    }
+    if (!config.manifestUrl || !config.defaultSlippage) {
+      throw new Error("Mini App configuration is incomplete.");
+    }
+    return config;
+  } catch (error) {
+    console.warn("Using fallback Mini App configuration", error);
+    return fallback;
+  }
 }
 
 bootstrap().catch((error) => {

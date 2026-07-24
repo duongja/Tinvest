@@ -1,9 +1,12 @@
 import type { CSSProperties, FormEvent } from "react";
 import { useMemo, useState } from "react";
+import { readJsonResponse, responseError } from "./http";
 
 type WaitlistState = "idle" | "loading" | "done" | "error";
 
 const orbitDots = Array.from({ length: 18 }, (_, index) => index);
+const telegramBotUrl = "https://t.me/Tinvester1bot";
+const demoAppUrl = "/app?token=STON&amount=0.1";
 
 export function Landing() {
   const [email, setEmail] = useState("");
@@ -17,7 +20,6 @@ export function Landing() {
     ],
     []
   );
-
   async function joinWaitlist(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("loading");
@@ -36,9 +38,9 @@ export function Landing() {
           }
         })
       });
-      const body = await response.json();
+      const body = await readJsonResponse<{ error?: string }>(response);
       if (!response.ok) {
-        throw new Error(body.error ?? "Could not join waitlist");
+        throw new Error(responseError(body, "Could not join waitlist"));
       }
       setStatus("done");
       setMessage("You're on the list.");
@@ -53,7 +55,9 @@ export function Landing() {
     <main className="landingShell">
       <section className="landingCopy" aria-labelledby="landing-title">
         <nav className="brandBar" aria-label="Tinvest">
-          <span className="brandMark">T</span>
+          <span className="brandMark">
+            <img src="/icon.png" alt="" />
+          </span>
           <span>Tinvest</span>
         </nav>
 
@@ -95,21 +99,46 @@ export function Landing() {
         </div>
       </section>
 
-      <section className="wealthOrbit" aria-label="Astronomical market intelligence visualization">
-        <div className="starfield">
-          {orbitDots.map((dot) => (
-            <i key={dot} style={{ "--dot": dot } as CSSProperties} />
-          ))}
+      <section className="betaStage" aria-label="Tinvest live beta access">
+        <div className="wealthOrbit" aria-hidden="true">
+          <div className="starfield">
+            {orbitDots.map((dot) => (
+              <i key={dot} style={{ "--dot": dot } as CSSProperties} />
+            ))}
+          </div>
+          <div className="orbit orbitOuter" />
+          <div className="orbit orbitMiddle" />
+          <div className="orbit orbitInner" />
+          <div className="planetCore">
+            <span>TON</span>
+          </div>
+          <div className="coin coinOne">$</div>
+          <div className="coin coinTwo">₮</div>
+          <div className="coin coinThree">AI</div>
         </div>
-        <div className="orbit orbitOuter" />
-        <div className="orbit orbitMiddle" />
-        <div className="orbit orbitInner" />
-        <div className="planetCore">
-          <span>TON</span>
-        </div>
-        <div className="coin coinOne">$</div>
-        <div className="coin coinTwo">₮</div>
-        <div className="coin coinThree">AI</div>
+
+        <aside className="testerAccess" aria-labelledby="tester-title">
+          <div className="testerTopline">
+            <span className="testerBadge"><i aria-hidden="true" /> Live beta</span>
+            <span className="testerChannel">Telegram access</span>
+          </div>
+
+          <div className="testerIntro">
+            <h2 id="tester-title">Tinvest beta is live.</h2>
+            <span>Research TON tokens, run AI risk checks, and review live STON.fi quotes directly in Telegram.</span>
+          </div>
+
+          <div className="testerActions">
+            <a className="telegramButton" href={telegramBotUrl} target="_blank" rel="noreferrer">
+              Open in Telegram <span aria-hidden="true">↗</span>
+            </a>
+            <a className="demoButton" href={demoAppUrl}>
+              Preview Mini App
+            </a>
+          </div>
+
+          <p className="testerTrust"><span aria-hidden="true">✓</span> Non-custodial. Every transaction requires wallet approval.</p>
+        </aside>
       </section>
     </main>
   );

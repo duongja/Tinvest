@@ -1,5 +1,6 @@
 import { TonConnectButton, useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { useEffect, useMemo, useState } from "react";
+import { readJsonResponse, responseError } from "./http";
 
 type AppProps = {
   defaultSlippage: string;
@@ -71,9 +72,9 @@ export function TradingApp({ defaultSlippage }: AppProps) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ token, amountTon, slippageTolerance })
       });
-      const body = await response.json();
+      const body = await readJsonResponse<Quote & { error?: string }>(response);
       if (!response.ok) {
-        throw new Error(body.error ?? "Quote failed");
+        throw new Error(responseError(body, "Quote failed"));
       }
       setQuote(body);
       void refreshAiCheck();
@@ -95,9 +96,9 @@ export function TradingApp({ defaultSlippage }: AppProps) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ token, amountTon, slippageTolerance })
       });
-      const body = await response.json();
+      const body = await readJsonResponse<{ check: AiSwapCheck; error?: string }>(response);
       if (!response.ok) {
-        throw new Error(body.error ?? "AI check failed");
+        throw new Error(responseError(body, "AI check failed"));
       }
       setAiCheck(body.check);
     } catch (err) {
@@ -122,9 +123,9 @@ export function TradingApp({ defaultSlippage }: AppProps) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ token, amountTon, slippageTolerance, walletAddress })
       });
-      const body = await response.json();
+      const body = await readJsonResponse<{ transaction: Parameters<typeof tonConnectUi.sendTransaction>[0]; error?: string }>(response);
       if (!response.ok) {
-        throw new Error(body.error ?? "Could not build transaction");
+        throw new Error(responseError(body, "Could not build transaction"));
       }
 
       await tonConnectUi.sendTransaction(body.transaction);

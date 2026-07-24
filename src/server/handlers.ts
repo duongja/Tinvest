@@ -114,9 +114,23 @@ export class ApiError extends Error {
 }
 
 export function apiError(error: unknown): { status: number; body: { error: string } } {
-  const message = error instanceof Error ? error.message : "Unexpected error";
-  const status =
-    error instanceof ApiError ? error.status : error instanceof z.ZodError ? 400 : message.includes("not found") ? 404 : 500;
   logger.warn({ error }, "request failed");
-  return { status, body: { error: message } };
+
+  if (error instanceof ApiError) {
+    return { status: error.status, body: { error: error.message } };
+  }
+
+  if (error instanceof z.ZodError) {
+    return { status: 400, body: { error: error.issues[0]?.message ?? "Invalid request" } };
+  }
+
+  if (
+    error instanceof Prisma.PrismaClientInitializationError ||
+    error instanceof Prisma.PrismaClientKnownRequestError ||
+    error instanceof Prisma.PrismaClientUnknownRequestError
+  ) {
+    return { status: 503, body: { error: "The data service is temporarily unavailable." } };
+  }
+
+  return { status: 500, body: { error: "The service is temporarily unavailable." } };
 }
